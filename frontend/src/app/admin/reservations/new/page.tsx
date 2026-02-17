@@ -5,6 +5,21 @@ import Link from "next/link";
 import { api, auth } from "@/lib/api";
 import { Table, Reservation, AvailabilityResponse } from "@/lib/types";
 
+// 17:30〜24:00まで15分間隔の時間選択肢を生成
+const generateTimeOptions = (): string[] => {
+  const options: string[] = [];
+  for (let h = 17; h <= 24; h++) {
+    for (let m = 0; m < 60; m += 15) {
+      if (h === 17 && m < 30) continue;
+      if (h === 24 && m > 0) break;
+      options.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
+    }
+  }
+  return options;
+};
+
+const timeOptions = generateTimeOptions();
+
 export default function AdminNewReservation() {
   const router = useRouter();
   const [tables, setTables] = useState<Table[]>([]);
@@ -183,13 +198,19 @@ export default function AdminNewReservation() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-1">開始時間 *</label>
-              <input
-                type="time"
+              <select
                 value={form.start_time}
                 onChange={(e) => setForm({ ...form, start_time: e.target.value })}
                 required
                 className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-gray-500 outline-none"
-              />
+              >
+                <option value="">選択してください</option>
+                {timeOptions.map((time) => (
+                  <option key={time} value={time}>
+                    {time}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-1">人数 *</label>
