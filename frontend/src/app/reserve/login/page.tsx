@@ -7,7 +7,7 @@ import { AuthResponse } from "@/lib/types";
 
 export default function CustomerLogin() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function CustomerLogin() {
     try {
       const data = await api<AuthResponse>("/auth/customer/login", {
         method: "POST",
-        body: { email, password },
+        body: { phone, password },
       });
       auth.login(data.token, data.user);
       router.push("/reserve");
@@ -45,15 +45,17 @@ export default function CustomerLogin() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-1">
-              メールアドレス
+              電話番号
             </label>
             <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="tel"
+              inputMode="numeric"
+              maxLength={11}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/[^0-9]/g, ""))}
               required
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
-              placeholder="example@email.com"
+              placeholder="09012345678"
             />
           </div>
           <div>

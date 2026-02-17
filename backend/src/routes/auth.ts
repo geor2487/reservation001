@@ -62,39 +62,48 @@ router.post("/customer/register", async (req: Request, res: Response): Promise<v
   try {
     const { email, password, name, phone } = req.body;
 
-    if (!email || !password || !name || !phone) {
-      res.status(400).json({ error: "メール、パスワード、名前、電話番号は必須です" });
+    if (!password || !name || !phone) {
+      res.status(400).json({ error: "パスワード、名前、電話番号は必須です" });
       return;
     }
 
-    // メールの重複チェック
-    const existing = await pool.query("SELECT id FROM customers WHERE email = $1", [email]);
-    if (existing.rows.length > 0) {
-      res.status(409).json({ error: "このメールアドレスは既に登録されています" });
+    // 電話番号の重複チェック
+    const existingPhone = await pool.query("SELECT id FROM customers WHERE phone = $1", [phone]);
+    if (existingPhone.rows.length > 0) {
+      res.status(409).json({ error: "この電話番号は既に登録されています" });
       return;
+    }
+
+    // メールの重複チェック（入力された場合のみ）
+    if (email) {
+      const existingEmail = await pool.query("SELECT id FROM customers WHERE email = $1", [email]);
+      if (existingEmail.rows.length > 0) {
+        res.status(409).json({ error: "このメールアドレスは既に登録されています" });
+        return;
+      }
     }
 
     // パスワードをハッシュ化して保存
     const passwordHash = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      `INSERT INTO customers (email, password_hash, name, phone) 
+      `INSERT INTO customers (email, password_hash, name, phone)
        VALUES ($1, $2, $3, $4) RETURNING id, email, name, phone`,
-      [email, passwordHash, name, phone || null]
+      [email || null, passwordHash, name, phone]
     );
 
     const customer = result.rows[0];
 
     // そのままログイン状態にする
     const token = jwt.sign(
-      { id: customer.id, email: customer.email, role: "customer" },
+      { id: customer.id, phone: customer.phone, role: "customer" },
       process.env.JWT_SECRET!,
       { expiresIn: "24h" }
     );
 
     res.status(201).json({
       token,
-      user: { id: customer.id, name: customer.name, email: customer.email, role: "customer" },
+      user: { id: customer.id, name: customer.name, email: customer.email, phone: customer.phone, role: "customer" },
     });
   } catch (error) {
     console.error("お客さん登録エラー:", error);
@@ -108,17 +117,17 @@ router.post("/customer/register", async (req: Request, res: Response): Promise<v
 // ============================================
 router.post("/customer/login", async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { phone, password } = req.body;
 
-    if (!email || !password) {
-      res.status(400).json({ error: "メールとパスワードを入力してください" });
+    if (!phone || !password) {
+      res.status(400).json({ error: "電話番号とパスワードを入力してください" });
       return;
     }
 
-    const result = await pool.query("SELECT * FROM customers WHERE email = $1", [email]);
+    const result = await pool.query("SELECT * FROM customers WHERE phone = $1", [phone]);
 
     if (result.rows.length === 0) {
-      res.status(401).json({ error: "メールアドレスまたはパスワードが間違っています" });
+      res.status(401).json({ error: "電話番号またはパスワードが間違っています" });
       return;
     }
 
@@ -126,12 +135,12 @@ router.post("/customer/login", async (req: Request, res: Response): Promise<void
     const isValid = await bcrypt.compare(password, customer.password_hash);
 
     if (!isValid) {
-      res.status(401).json({ error: "メールアドレスまたはパスワードが間違っています" });
+      res.status(401).json({ error: "電話番号またはパスワードが間違っています" });
       return;
     }
 
     const token = jwt.sign(
-      { id: customer.id, email: customer.email, role: "customer" },
+      { id: customer.id, phone: customer.phone, role: "customer" },
       process.env.JWT_SECRET!,
       { expiresIn: "24h" }
     );

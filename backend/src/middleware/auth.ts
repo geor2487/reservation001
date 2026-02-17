@@ -8,7 +8,8 @@ import jwt from "jsonwebtoken";
 export interface AuthRequest extends Request {
   user?: {
     id: number;
-    email: string;
+    email?: string;
+    phone?: string;
     role: "staff" | "customer";
   };
 }
@@ -61,7 +62,8 @@ export const authenticateCustomer = (
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
       id: number;
-      email: string;
+      email?: string;
+      phone?: string;
       role: string;
     };
 
@@ -70,7 +72,7 @@ export const authenticateCustomer = (
       return;
     }
 
-    req.user = { id: decoded.id, email: decoded.email, role: "customer" };
+    req.user = { id: decoded.id, email: decoded.email, phone: decoded.phone, role: "customer" };
     next();
   } catch {
     res.status(401).json({ error: "トークンが無効です" });
