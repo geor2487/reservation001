@@ -9,6 +9,16 @@ import {
 const router = Router();
 
 // ============================================
+// 過去日付チェック用のヘルパー関数
+// ============================================
+const isPastDate = (date: string): boolean => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(date + "T00:00:00");
+  return target < today;
+};
+
+// ============================================
 // ダブルブッキングチェック用のヘルパー関数
 // 同じテーブル・同じ日・時間が重なる予約がないか確認する
 // ============================================
@@ -166,6 +176,12 @@ router.post(
         return;
       }
 
+      // 過去日付チェック
+      if (isPastDate(date)) {
+        res.status(400).json({ error: "過去の日付には予約できません" });
+        return;
+      }
+
       // end_timeが未指定の場合、start_time + 2時間で自動設定
       const resolvedEndTime = end_time || calculateEndTime(start_time);
 
@@ -196,7 +212,7 @@ router.post(
         return;
       }
 
-      // 予約を作成（customer_id = NULL, status = 'pending', created_by = 'customer'）
+      // 予約を作成
       const result = await pool.query(
         `INSERT INTO reservations
          (table_id, customer_id, customer_name, customer_phone, date, start_time, end_time, party_size, status, created_by)
@@ -227,6 +243,12 @@ router.post(
       // バリデーション
       if (!table_id || !date || !start_time || !party_size) {
         res.status(400).json({ error: "テーブル、日付、時間、人数は必須です" });
+        return;
+      }
+
+      // 過去日付チェック
+      if (isPastDate(date)) {
+        res.status(400).json({ error: "過去の日付には予約できません" });
         return;
       }
 
@@ -297,6 +319,12 @@ router.post(
 
       if (!table_id || !customer_name || !date || !start_time || !party_size) {
         res.status(400).json({ error: "テーブル、名前、日付、時間、人数は必須です" });
+        return;
+      }
+
+      // 過去日付チェック
+      if (isPastDate(date)) {
+        res.status(400).json({ error: "過去の日付には予約できません" });
         return;
       }
 

@@ -345,10 +345,11 @@ export default function ReservePage() {
                         </label>
                         <input
                           type="tel"
+                          inputMode="numeric"
                           value={guestPhone}
-                          onChange={(e) => setGuestPhone(e.target.value)}
+                          onChange={(e) => setGuestPhone(e.target.value.replace(/[^0-9]/g, ""))}
                           required
-                          placeholder="090-1234-5678"
+                          placeholder="09012345678"
                           className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
                         />
                       </div>

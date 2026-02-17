@@ -144,10 +144,11 @@ export default function AdminNewReservation() {
               <label className="block text-sm font-medium text-gray-900 mb-1">電話番号</label>
               <input
                 type="tel"
+                inputMode="numeric"
                 value={form.customer_phone}
-                onChange={(e) => setForm({ ...form, customer_phone: e.target.value })}
+                onChange={(e) => setForm({ ...form, customer_phone: e.target.value.replace(/[^0-9]/g, "") })}
                 className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-gray-500 outline-none"
-                placeholder="090-1234-5678"
+                placeholder="09012345678"
               />
             </div>
           </div>
