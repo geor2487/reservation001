@@ -254,7 +254,6 @@ export default function AdminDashboard() {
                     <th className="px-4 py-3">テーブル</th>
                     <th className="px-4 py-3">お客さん</th>
                     <th className="px-4 py-3">人数</th>
-                    <th className="px-4 py-3">ステータス</th>
                     <th className="px-4 py-3">メモ</th>
                     <th className="px-4 py-3">操作</th>
                   </tr>
@@ -278,20 +277,6 @@ export default function AdminDashboard() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-sm">{r.party_size}人</td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={`text-xs px-2 py-0.5 rounded-full ${
-                            r.status === "confirmed"
-                              ? "bg-green-100 text-green-700"
-                              : "bg-gray-100 text-gray-500"
-                          }`}
-                        >
-                          {r.status === "confirmed" ? "確定" : "キャンセル"}
-                        </span>
-                        <span className="ml-1 text-xs text-gray-900">
-                          ({r.created_by === "customer" ? "Web" : "店員"})
-                        </span>
-                      </td>
                       <td className="px-4 py-3 text-sm text-gray-900 max-w-[150px] truncate">
                         {r.note || "-"}
                       </td>
