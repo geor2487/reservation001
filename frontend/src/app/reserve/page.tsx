@@ -211,6 +211,23 @@ export default function ReservePage() {
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
+        {success ? (
+          <div className="flex flex-col items-center justify-center py-20">
+            <h1 className="text-2xl font-bold mb-4">予約が完了しました</h1>
+            <p className="text-gray-500 mb-8">このページを閉じても問題ありません</p>
+            <button
+              onClick={() => {
+                setSuccess("");
+                setDate("");
+                setAvailability(null);
+              }}
+              className="text-orange-500 hover:underline text-sm"
+            >
+              続けて予約する
+            </button>
+          </div>
+        ) : (
+        <>
         <h1 className="text-2xl font-bold mb-6">予約する</h1>
 
         {!user && (
@@ -222,9 +239,6 @@ export default function ReservePage() {
 
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
-        {success && (
-          <div className="bg-green-50 text-green-600 p-3 rounded-lg mb-4 text-sm">{success}</div>
         )}
 
         {/* Step 1: 人数選択 */}
@@ -243,7 +257,7 @@ export default function ReservePage() {
             className="w-32 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
           />
           {partySize >= 1 && (
-            <span className="ml-2 text-sm text-gray-900">{partySize}名</span>
+            <span className="ml-2 text-sm text-gray-900">名</span>
           )}
         </div>
 
@@ -415,6 +429,8 @@ export default function ReservePage() {
             </div>
           );
         })()}
+        </>
+        )}
       </main>
     </div>
   );
