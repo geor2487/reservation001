@@ -346,6 +346,7 @@ export default function ReservePage() {
                         <input
                           type="tel"
                           inputMode="numeric"
+                          maxLength={11}
                           value={guestPhone}
                           onChange={(e) => setGuestPhone(e.target.value.replace(/[^0-9]/g, ""))}
                           required

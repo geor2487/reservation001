@@ -114,7 +114,6 @@ export default function AdminNewReservation() {
             <nav className="flex gap-3 text-sm">
               <Link href="/admin" className="text-gray-300 hover:text-white">予約一覧</Link>
               <Link href="/admin/reservations/new" className="text-orange-300 hover:text-orange-200">予約登録</Link>
-              <Link href="/admin/tables" className="text-gray-300 hover:text-white">テーブル管理</Link>
             </nav>
           </div>
         </div>
@@ -145,6 +144,7 @@ export default function AdminNewReservation() {
               <input
                 type="tel"
                 inputMode="numeric"
+                maxLength={11}
                 value={form.customer_phone}
                 onChange={(e) => setForm({ ...form, customer_phone: e.target.value.replace(/[^0-9]/g, "") })}
                 className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-gray-500 outline-none"

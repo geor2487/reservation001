@@ -5,6 +5,7 @@ export default function Home() {
     <div className="min-h-screen flex items-center justify-center relative">
       <div className="text-center space-y-8 p-8">
         <h1 className="text-4xl font-bold text-gray-800">POND</h1>
+        <p className="text-gray-900">予約フォーム</p>
         <div>
           <Link
             href="/reserve"

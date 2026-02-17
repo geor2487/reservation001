@@ -31,6 +31,7 @@ export default function AdminDashboard() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showMenu, setShowMenu] = useState(false);
 
   useEffect(() => {
     const u = auth.getUser();
@@ -119,14 +120,32 @@ export default function AdminDashboard() {
             <nav className="flex gap-3 text-sm">
               <Link href="/admin" className="text-orange-300 hover:text-orange-200">予約一覧</Link>
               <Link href="/admin/reservations/new" className="text-gray-300 hover:text-white">予約登録</Link>
-              <Link href="/admin/tables" className="text-gray-300 hover:text-white">テーブル管理</Link>
             </nav>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-300">{user.name}</span>
-            <button onClick={handleLogout} className="text-sm text-gray-400 hover:text-white">
-              ログアウト
+          <div className="relative">
+            <button
+              onClick={() => setShowMenu(!showMenu)}
+              className="text-sm text-gray-300 hover:text-white"
+            >
+              {user.name}
             </button>
+            {showMenu && (
+              <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-1 z-50">
+                <Link
+                  href="/admin/settings"
+                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  onClick={() => setShowMenu(false)}
+                >
+                  設定
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                >
+                  ログアウト
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>

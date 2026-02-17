@@ -99,7 +99,6 @@ export default function AdminTables() {
           <nav className="flex gap-3 text-sm">
             <Link href="/admin" className="text-gray-300 hover:text-white">予約一覧</Link>
             <Link href="/admin/reservations/new" className="text-gray-300 hover:text-white">予約登録</Link>
-            <Link href="/admin/tables" className="text-orange-300 hover:text-orange-200">テーブル管理</Link>
           </nav>
         </div>
       </header>

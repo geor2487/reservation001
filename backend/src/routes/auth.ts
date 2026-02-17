@@ -2,6 +2,7 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db/pool";
+import { authenticateStaff, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
@@ -61,8 +62,8 @@ router.post("/customer/register", async (req: Request, res: Response): Promise<v
   try {
     const { email, password, name, phone } = req.body;
 
-    if (!email || !password || !name) {
-      res.status(400).json({ error: "メール、パスワード、名前は必須です" });
+    if (!email || !password || !name || !phone) {
+      res.status(400).json({ error: "メール、パスワード、名前、電話番号は必須です" });
       return;
     }
 
@@ -147,6 +148,33 @@ router.post("/customer/login", async (req: Request, res: Response): Promise<void
     });
   } catch (error) {
     console.error("お客さんログインエラー:", error);
+    res.status(500).json({ error: "サーバーエラーが発生しました" });
+  }
+});
+
+// ============================================
+// スタッフ名変更
+// PUT /api/auth/staff/name
+// ============================================
+router.put("/staff/name", authenticateStaff, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+      res.status(400).json({ error: "名前を入力してください" });
+      return;
+    }
+
+    const result = await pool.query(
+      "UPDATE staff SET name = $1, updated_at = NOW() WHERE id = $2 RETURNING id, name, email",
+      [name.trim(), req.user!.id]
+    );
+
+    res.json({
+      user: { id: result.rows[0].id, name: result.rows[0].name, email: result.rows[0].email, role: "staff" },
+    });
+  } catch (error) {
+    console.error("スタッフ名変更エラー:", error);
     res.status(500).json({ error: "サーバーエラーが発生しました" });
   }
 });

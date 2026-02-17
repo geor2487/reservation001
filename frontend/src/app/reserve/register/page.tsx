@@ -63,12 +63,14 @@ export default function CustomerRegister() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-900 mb-1">電話番号</label>
+            <label className="block text-sm font-medium text-gray-900 mb-1">電話番号 *</label>
             <input
               type="tel"
               inputMode="numeric"
+              maxLength={11}
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value.replace(/[^0-9]/g, "") })}
+              required
               className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
               placeholder="09012345678"
             />
