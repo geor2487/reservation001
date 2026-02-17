@@ -34,6 +34,7 @@ export default function ReservePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   // 今日以降の日付のみ選べるようにする
   const today = new Date().toISOString().split("T")[0];
@@ -171,13 +172,31 @@ export default function ReservePage() {
                 >
                   マイ予約
                 </Link>
-                <span className="text-sm text-gray-900">{user.name}さん</span>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-gray-400 hover:text-gray-600"
-                >
-                  ログアウト
-                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowMenu(!showMenu)}
+                    className="text-sm text-gray-900 hover:text-orange-500"
+                  >
+                    {user.name}さん
+                  </button>
+                  {showMenu && (
+                    <div className="absolute right-0 mt-2 w-36 bg-white rounded-lg shadow-lg py-1 z-50 border">
+                      <Link
+                        href="/reserve/settings"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setShowMenu(false)}
+                      >
+                        設定
+                      </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        ログアウト
+                      </button>
+                    </div>
+                  )}
+                </div>
               </>
             ) : (
               <Link

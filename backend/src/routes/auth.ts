@@ -2,7 +2,7 @@ import { Router, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db/pool";
-import { authenticateStaff, AuthRequest } from "../middleware/auth";
+import { authenticateStaff, authenticateCustomer, AuthRequest } from "../middleware/auth";
 
 const router = Router();
 
@@ -184,6 +184,130 @@ router.put("/staff/name", authenticateStaff, async (req: AuthRequest, res: Respo
     });
   } catch (error) {
     console.error("スタッフ名変更エラー:", error);
+    res.status(500).json({ error: "サーバーエラーが発生しました" });
+  }
+});
+
+// ============================================
+// スタッフログイン設定変更（メアド・パスワード）
+// PUT /api/auth/staff/login-settings
+// ============================================
+router.put("/staff/login-settings", authenticateStaff, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { email, current_password, new_password } = req.body;
+
+    if (!current_password) {
+      res.status(400).json({ error: "現在のパスワードを入力してください" });
+      return;
+    }
+
+    // 現在のパスワード確認
+    const staffResult = await pool.query("SELECT * FROM staff WHERE id = $1", [req.user!.id]);
+    const staff = staffResult.rows[0];
+    const isValid = await bcrypt.compare(current_password, staff.password_hash);
+    if (!isValid) {
+      res.status(401).json({ error: "現在のパスワードが間違っています" });
+      return;
+    }
+
+    // メアド変更
+    if (email && email !== staff.email) {
+      const existing = await pool.query("SELECT id FROM staff WHERE email = $1 AND id != $2", [email, req.user!.id]);
+      if (existing.rows.length > 0) {
+        res.status(409).json({ error: "このメールアドレスは既に使用されています" });
+        return;
+      }
+      await pool.query("UPDATE staff SET email = $1, updated_at = NOW() WHERE id = $2", [email, req.user!.id]);
+    }
+
+    // パスワード変更
+    if (new_password) {
+      if (new_password.length < 6) {
+        res.status(400).json({ error: "パスワードは6文字以上にしてください" });
+        return;
+      }
+      const hash = await bcrypt.hash(new_password, 10);
+      await pool.query("UPDATE staff SET password_hash = $1, updated_at = NOW() WHERE id = $2", [hash, req.user!.id]);
+    }
+
+    const updated = await pool.query("SELECT id, name, email FROM staff WHERE id = $1", [req.user!.id]);
+    res.json({ user: { ...updated.rows[0], role: "staff" } });
+  } catch (error) {
+    console.error("スタッフログイン設定変更エラー:", error);
+    res.status(500).json({ error: "サーバーエラーが発生しました" });
+  }
+});
+
+// ============================================
+// 顧客一覧（店員用）
+// GET /api/auth/customers
+// ============================================
+router.get("/customers", authenticateStaff, async (_req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const result = await pool.query(
+      "SELECT id, name, email, phone, created_at FROM customers ORDER BY created_at DESC"
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("顧客一覧取得エラー:", error);
+    res.status(500).json({ error: "サーバーエラーが発生しました" });
+  }
+});
+
+// ============================================
+// 顧客プロフィール変更
+// PUT /api/auth/customer/profile
+// ============================================
+router.put("/customer/profile", authenticateCustomer, async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const { name, phone, email, current_password, new_password } = req.body;
+
+    if (!name || !phone) {
+      res.status(400).json({ error: "名前と電話番号は必須です" });
+      return;
+    }
+
+    // 電話番号の重複チェック
+    const existingPhone = await pool.query("SELECT id FROM customers WHERE phone = $1 AND id != $2", [phone, req.user!.id]);
+    if (existingPhone.rows.length > 0) {
+      res.status(409).json({ error: "この電話番号は既に登録されています" });
+      return;
+    }
+
+    // メアドの重複チェック
+    if (email) {
+      const existingEmail = await pool.query("SELECT id FROM customers WHERE email = $1 AND id != $2", [email, req.user!.id]);
+      if (existingEmail.rows.length > 0) {
+        res.status(409).json({ error: "このメールアドレスは既に登録されています" });
+        return;
+      }
+    }
+
+    await pool.query(
+      "UPDATE customers SET name = $1, phone = $2, email = $3, updated_at = NOW() WHERE id = $4",
+      [name.trim(), phone, email || null, req.user!.id]
+    );
+
+    // パスワード変更
+    if (new_password && current_password) {
+      const customer = await pool.query("SELECT password_hash FROM customers WHERE id = $1", [req.user!.id]);
+      const isValid = await bcrypt.compare(current_password, customer.rows[0].password_hash);
+      if (!isValid) {
+        res.status(401).json({ error: "現在のパスワードが間違っています" });
+        return;
+      }
+      if (new_password.length < 6) {
+        res.status(400).json({ error: "パスワードは6文字以上にしてください" });
+        return;
+      }
+      const hash = await bcrypt.hash(new_password, 10);
+      await pool.query("UPDATE customers SET password_hash = $1, updated_at = NOW() WHERE id = $2", [hash, req.user!.id]);
+    }
+
+    const updated = await pool.query("SELECT id, name, email, phone FROM customers WHERE id = $1", [req.user!.id]);
+    res.json({ user: { ...updated.rows[0], role: "customer" } });
+  } catch (error) {
+    console.error("顧客プロフィール変更エラー:", error);
     res.status(500).json({ error: "サーバーエラーが発生しました" });
   }
 });
