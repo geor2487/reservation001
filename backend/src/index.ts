@@ -34,6 +34,36 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", storeName: process.env.STORE_NAME });
 });
 
+// デバッグ用: INSERT テスト
+app.get("/api/debug/insert-test", async (_req, res) => {
+  try {
+    const { supabaseAdmin } = await import("./infrastructure/supabase/client");
+    const { data, error } = await supabaseAdmin
+      .from("reservations")
+      .insert({
+        table_id: 2,
+        customer_id: null,
+        customer_name: "デバッグテスト",
+        customer_phone: "09000000000",
+        date: "2026-02-18",
+        start_time: "21:00",
+        end_time: "23:00",
+        party_size: 1,
+        status: "confirmed",
+        created_by: "customer",
+      })
+      .select()
+      .single();
+    if (error) {
+      res.json({ success: false, error: { message: error.message, code: error.code, details: error.details, hint: error.hint } });
+    } else {
+      res.json({ success: true, data });
+    }
+  } catch (err) {
+    res.json({ success: false, caught: err instanceof Error ? err.message : String(err), stack: err instanceof Error ? err.stack : undefined });
+  }
+});
+
 // サーバー起動
 app.listen(PORT, () => {
   console.log(`サーバー起動: http://localhost:${PORT}`);
