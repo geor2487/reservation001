@@ -13,7 +13,7 @@ export type Table = {
 export type Reservation = {
   id: number;
   table_id: number;
-  customer_id: number | null;
+  customer_id: string | null;
   customer_name: string;
   customer_phone: string | null;
   date: string;
@@ -31,7 +31,7 @@ export type Reservation = {
 };
 
 export type User = {
-  id: number;
+  id: string;
   name: string;
   email: string;
   phone?: string;

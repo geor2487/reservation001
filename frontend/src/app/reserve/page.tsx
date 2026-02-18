@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { api, auth } from "@/lib/api";
+import { api, customerAuth as auth } from "@/lib/api";
 import { AvailabilityResponse, Table, Reservation, User } from "@/lib/types";
 
 // 17:30〜22:00まで15分間隔の時間選択肢を生成
@@ -95,6 +95,11 @@ export default function ReservePage() {
 
     if (!user && (!guestName || !guestPhone)) {
       setError("名前と電話番号を入力してください");
+      return;
+    }
+
+    if (!user && !/^0\d{9,10}$/.test(guestPhone)) {
+      setError("電話番号は0始まりの10〜11桁の数字で入力してください");
       return;
     }
 
@@ -386,6 +391,7 @@ export default function ReservePage() {
                           placeholder="09012345678"
                           className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
                         />
+                        <p className="mt-1 text-xs text-gray-500">ハイフンなし（例: 09012345678）</p>
                       </div>
                     </div>
                   )}

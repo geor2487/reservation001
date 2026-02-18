@@ -37,22 +37,30 @@ export async function api<T>(endpoint: string, options: FetchOptions = {}): Prom
 }
 
 // ローカルストレージからトークンを取得/保存するヘルパー
-export const auth = {
-  getToken: (): string | null => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
-  },
-  getUser: () => {
-    if (typeof window === "undefined") return null;
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
-  },
-  login: (token: string, user: object) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("user", JSON.stringify(user));
-  },
-  logout: () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-  },
-};
+// 店員とお客さんで別々のキーを使い、ログイン状態が干渉しないようにする
+function createAuth(prefix: string) {
+  const tokenKey = `${prefix}_token`;
+  const userKey = `${prefix}_user`;
+  return {
+    getToken: (): string | null => {
+      if (typeof window === "undefined") return null;
+      return localStorage.getItem(tokenKey);
+    },
+    getUser: () => {
+      if (typeof window === "undefined") return null;
+      const user = localStorage.getItem(userKey);
+      return user ? JSON.parse(user) : null;
+    },
+    login: (token: string, user: object) => {
+      localStorage.setItem(tokenKey, token);
+      localStorage.setItem(userKey, JSON.stringify(user));
+    },
+    logout: () => {
+      localStorage.removeItem(tokenKey);
+      localStorage.removeItem(userKey);
+    },
+  };
+}
+
+export const staffAuth = createAuth("staff");
+export const customerAuth = createAuth("customer");

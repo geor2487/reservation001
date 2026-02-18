@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, auth } from "@/lib/api";
+import { api, customerAuth as auth } from "@/lib/api";
 import { Reservation } from "@/lib/types";
 
 export default function MyReservations() {

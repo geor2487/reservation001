@@ -2,14 +2,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, auth } from "@/lib/api";
+import { api, staffAuth as auth } from "@/lib/api";
 import { User } from "@/lib/types";
 
 type Customer = {
-  id: number;
+  id: string;
   name: string;
   email: string | null;
-  phone: string;
+  phone: string | null;
   created_at: string;
 };
 

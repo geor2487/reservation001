@@ -1,17 +1,27 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import authRoutes from "./routes/auth";
-import tablesRoutes from "./routes/tables";
-import reservationsRoutes from "./routes/reservations";
+import authRoutes from "./presentation/routes/auth-routes";
+import tablesRoutes from "./presentation/routes/table-routes";
+import reservationsRoutes from "./presentation/routes/reservation-routes";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ミドルウェア設定
-app.use(cors()); // フロントエンドからのリクエストを許可
+// CORS設定（本番ではFRONTEND_URLのみ許可）
+const allowedOrigins = [
+  "http://localhost:3000",
+  process.env.FRONTEND_URL,
+].filter(Boolean) as string[];
+
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 app.use(express.json()); // JSONのリクエストボディを解析
 
 // ルーティング（URLとAPIの紐づけ）

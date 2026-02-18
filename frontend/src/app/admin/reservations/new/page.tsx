@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, auth } from "@/lib/api";
+import { api, staffAuth as auth } from "@/lib/api";
 import { Table, Reservation, AvailabilityResponse } from "@/lib/types";
 
 // 17:30〜24:00まで15分間隔の時間選択肢を生成

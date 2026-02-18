@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, auth } from "@/lib/api";
+import { api, customerAuth as auth } from "@/lib/api";
 import { User } from "@/lib/types";
 
 export default function CustomerSettings() {
@@ -36,8 +36,12 @@ export default function CustomerSettings() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    if (!form.name.trim() || !form.phone) {
-      setError("名前と電話番号は必須です");
+    if (!form.name.trim() || !form.email || !form.phone) {
+      setError("名前、メールアドレス、電話番号は必須です");
+      return;
+    }
+    if (!/^0\d{9,10}$/.test(form.phone)) {
+      setError("電話番号は0始まりの10〜11桁の数字で入力してください");
       return;
     }
     setLoading(true);
@@ -129,6 +133,17 @@ export default function CustomerSettings() {
               />
             </div>
             <div>
+              <label className="block text-sm font-medium text-gray-900 mb-1">メールアドレス *</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                required
+                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
+                placeholder="example@email.com"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-900 mb-1">電話番号 *</label>
               <input
                 type="tel"
@@ -140,16 +155,7 @@ export default function CustomerSettings() {
                 className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
                 placeholder="09012345678"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-900 mb-1">メールアドレス</label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 outline-none"
-                placeholder="example@email.com"
-              />
+              <p className="mt-1 text-xs text-gray-500">ハイフンなし（例: 09012345678）</p>
             </div>
             <button
               type="submit"

@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { api, auth } from "@/lib/api";
+import { api, staffAuth as auth } from "@/lib/api";
 import { Table } from "@/lib/types";
 
 export default function AdminTables() {
