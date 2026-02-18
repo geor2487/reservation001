@@ -85,8 +85,7 @@ router.post("/guest", async (req: Request, res: Response): Promise<void> => {
       return;
     }
     console.error("ゲスト予約作成エラー:", error);
-    const detail = error instanceof Error ? error.message : String(error);
-    res.status(500).json({ error: "サーバーエラーが発生しました", detail });
+    res.status(500).json({ error: "サーバーエラーが発生しました" });
   }
 });
 
