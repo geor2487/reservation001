@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, staffAuth as auth } from "@/lib/api";
 import { Reservation, User, Table } from "@/lib/types";
+import CustomerDetailModal from "./components/CustomerDetailModal";
 
 // タイムライン用定数
 const START_HOUR = 17;
@@ -32,6 +33,7 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showMenu, setShowMenu] = useState(false);
+  const [modalTarget, setModalTarget] = useState<{ customerId: string | null; customerPhone: string | null } | null>(null);
 
   useEffect(() => {
     const u = auth.getUser();
@@ -102,6 +104,13 @@ export default function AdminDashboard() {
   // テーブルごとの確定予約を取得
   const getTableReservations = (tableId: number) =>
     reservations.filter((r) => r.table_id === tableId && r.status === "confirmed");
+
+  const openCustomerModal = (r: Reservation) => {
+    setModalTarget({
+      customerId: r.customer_id,
+      customerPhone: r.customer_phone,
+    });
+  };
 
   const confirmedCount = reservations.filter((r) => r.status === "confirmed").length;
   const totalGuests = reservations
@@ -245,12 +254,13 @@ export default function AdminDashboard() {
                         {tableReservations.map((r) => (
                           <div
                             key={r.id}
-                            className="absolute top-1 bottom-1 bg-orange-100 border border-orange-300 rounded-md px-1.5 flex items-center overflow-hidden cursor-default"
+                            className="absolute top-1 bottom-1 bg-orange-100 border border-orange-300 rounded-md px-1.5 flex items-center overflow-hidden cursor-pointer hover:bg-orange-200 transition-colors"
                             style={{
                               left: `${getLeftPercent(r.start_time)}%`,
                               width: `${getWidthPercent(r.start_time, r.end_time)}%`,
                             }}
                             title={`${r.customer_name} ${r.party_size}人 ${r.start_time?.slice(0, 5)}〜${r.end_time?.slice(0, 5)}${r.note ? `\nメモ: ${r.note}` : ""}`}
+                            onClick={() => openCustomerModal(r)}
                           >
                             <span className="text-xs text-orange-900 truncate font-medium">
                               {r.customer_name} {r.party_size}人
@@ -290,10 +300,15 @@ export default function AdminDashboard() {
                       </td>
                       <td className="px-4 py-3 text-sm">{r.table_name}</td>
                       <td className="px-4 py-3">
-                        <div className="text-sm font-medium">{r.customer_name}</div>
-                        {r.customer_phone && (
-                          <div className="text-xs text-gray-900">{r.customer_phone}</div>
-                        )}
+                        <button
+                          onClick={() => openCustomerModal(r)}
+                          className="text-left hover:underline"
+                        >
+                          <div className="text-sm font-medium text-gray-900">{r.customer_name}</div>
+                          {r.customer_phone && (
+                            <div className="text-xs text-gray-500">{r.customer_phone}</div>
+                          )}
+                        </button>
                       </td>
                       <td className="px-4 py-3 text-sm">{r.party_size}人</td>
                       <td className="px-4 py-3 text-sm text-gray-900 max-w-[150px] truncate">
@@ -317,6 +332,15 @@ export default function AdminDashboard() {
           </>
         )}
       </main>
+
+      {/* 顧客詳細モーダル */}
+      {modalTarget && (
+        <CustomerDetailModal
+          customerId={modalTarget.customerId}
+          customerPhone={modalTarget.customerPhone}
+          onClose={() => setModalTarget(null)}
+        />
+      )}
     </div>
   );
 }

@@ -32,4 +32,5 @@ export interface IReservationRepository {
   update(id: number, data: Record<string, unknown>): Promise<Record<string, unknown>>;
   cancelByStaff(id: number): Promise<Record<string, unknown> | null>;
   cancelByCustomer(id: number, customerId: string): Promise<Record<string, unknown> | null>;
+  findByPhone(phone: string): Promise<ReservationRow[]>;
 }

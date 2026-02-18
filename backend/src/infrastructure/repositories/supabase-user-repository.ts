@@ -5,7 +5,7 @@ export class SupabaseUserRepository implements IUserRepository {
   async findById(id: string): Promise<ProfileRow | null> {
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, name, email, phone, role, created_at")
+      .select("id, name, email, phone, role, staff_note, created_at")
       .eq("id", id)
       .single();
 
@@ -28,12 +28,24 @@ export class SupabaseUserRepository implements IUserRepository {
   async findCustomers(): Promise<ProfileRow[]> {
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, name, email, phone, created_at")
+      .select("id, name, email, phone, staff_note, created_at")
       .eq("role", "customer")
       .order("created_at", { ascending: false });
 
     if (error) throw error;
     return (data ?? []) as ProfileRow[];
+  }
+
+  async findByPhone(phone: string): Promise<ProfileRow | null> {
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("id, name, email, phone, role, staff_note, created_at")
+      .eq("phone", phone)
+      .eq("role", "customer")
+      .single();
+
+    if (error || !data) return null;
+    return data as ProfileRow;
   }
 
   async updateProfile(id: string, data: Record<string, unknown>): Promise<ProfileRow | null> {
@@ -46,5 +58,17 @@ export class SupabaseUserRepository implements IUserRepository {
 
     if (error) throw error;
     return result as ProfileRow | null;
+  }
+
+  async updateStaffNote(id: string, note: string): Promise<ProfileRow | null> {
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .update({ staff_note: note })
+      .eq("id", id)
+      .select("id, name, email, phone, role, staff_note, created_at")
+      .single();
+
+    if (error) throw error;
+    return data as ProfileRow | null;
   }
 }

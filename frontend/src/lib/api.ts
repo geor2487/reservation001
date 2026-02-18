@@ -30,6 +30,18 @@ export async function api<T>(endpoint: string, options: FetchOptions = {}): Prom
   const data = await response.json();
 
   if (!response.ok) {
+    // 401 = トークン期限切れ → ログアウトしてログインページへリダイレクト
+    if (response.status === 401 && typeof window !== "undefined") {
+      // staff or customer のどちらかをクリアしてリダイレクト
+      const isAdmin = window.location.pathname.startsWith("/admin");
+      if (isAdmin) {
+        staffAuth.logout();
+        window.location.href = "/admin/login";
+      } else {
+        customerAuth.logout();
+        window.location.href = "/reserve/login";
+      }
+    }
     throw new Error(data.error || "APIエラーが発生しました");
   }
 

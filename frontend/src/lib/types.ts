@@ -48,3 +48,17 @@ export type AvailabilityResponse = {
   tables: Table[];
   reservations: Reservation[];
 };
+
+export type CustomerDetail = {
+  profile: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    role: string;
+    staff_note: string | null;
+    created_at: string;
+  } | null;
+  visitCount: number;
+  reservations: Reservation[];
+};

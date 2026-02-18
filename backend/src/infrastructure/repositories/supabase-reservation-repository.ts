@@ -119,6 +119,18 @@ export class SupabaseReservationRepository implements IReservationRepository {
     return data;
   }
 
+  async findByPhone(phone: string): Promise<ReservationRow[]> {
+    const { data, error } = await supabaseAdmin
+      .from("reservations")
+      .select("*, tables(table_name, capacity)")
+      .eq("customer_phone", phone)
+      .order("date", { ascending: false })
+      .order("start_time", { ascending: false });
+
+    if (error) throw error;
+    return (data ?? []) as unknown as ReservationRow[];
+  }
+
   async cancelByCustomer(id: number, customerId: string): Promise<Record<string, unknown> | null> {
     const { data, error } = await supabaseAdmin
       .from("reservations")

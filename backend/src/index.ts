@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import authRoutes from "./presentation/routes/auth-routes";
 import tablesRoutes from "./presentation/routes/table-routes";
 import reservationsRoutes from "./presentation/routes/reservation-routes";
+import customerRoutes from "./presentation/routes/customer-routes";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use(express.json()); // JSONのリクエストボディを解析
 app.use("/api/auth", authRoutes);
 app.use("/api/tables", tablesRoutes);
 app.use("/api/reservations", reservationsRoutes);
+app.use("/api/customers", customerRoutes);
 
 // ヘルスチェック（サーバーが動いてるか確認用）
 app.get("/api/health", (_req, res) => {
