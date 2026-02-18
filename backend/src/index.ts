@@ -34,6 +34,13 @@ app.get("/api/health", (_req, res) => {
   res.json({ status: "ok", storeName: process.env.STORE_NAME });
 });
 
+// デバッグ用: キー確認
+app.get("/api/debug/key-check", (_req, res) => {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  const decoded = Buffer.from(key.split(".")[1] || "", "base64").toString();
+  res.json({ keyLength: key.length, keyEnd: key.slice(-10), decodedPayload: decoded });
+});
+
 // デバッグ用: INSERT テスト
 app.get("/api/debug/insert-test", async (_req, res) => {
   try {
