@@ -34,6 +34,7 @@ export default function ReservePage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fetchingAvailability, setFetchingAvailability] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
   // 今日以降の日付のみ選べるようにする
@@ -48,6 +49,8 @@ export default function ReservePage() {
   useEffect(() => {
     if (!date) return;
     const fetchAvailability = async () => {
+      setFetchingAvailability(true);
+      setError("");
       try {
         const data = await api<AvailabilityResponse>(
           `/reservations/availability?date=${date}`
@@ -56,6 +59,8 @@ export default function ReservePage() {
         setSelectedTable(null);
       } catch {
         setError("空き状況の取得に失敗しました");
+      } finally {
+        setFetchingAvailability(false);
       }
     };
     fetchAvailability();
@@ -280,8 +285,15 @@ export default function ReservePage() {
           </div>
         )}
 
+        {/* ローディング表示 */}
+        {fetchingAvailability && (
+          <div className="bg-white rounded-xl shadow-sm p-6 mb-6 text-center text-gray-500">
+            空き状況を取得中...
+          </div>
+        )}
+
         {/* Step 3: 来店時間選択 */}
-        {partySize >= 1 && availability && (
+        {partySize >= 1 && availability && !fetchingAvailability && (
           <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
             <h2 className="font-semibold mb-3">3. 来店時間を選択</h2>
             <select
@@ -303,7 +315,7 @@ export default function ReservePage() {
         )}
 
         {/* Step 4: テーブル選択 */}
-        {partySize >= 1 && availability && form.start_time && (() => {
+        {partySize >= 1 && availability && !fetchingAvailability && form.start_time && (() => {
           const filteredTables = availability.tables.filter(
             (t) => t.capacity >= partySize && t.capacity <= partySize + 2
           );

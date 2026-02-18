@@ -5,7 +5,7 @@ export class SupabaseUserRepository implements IUserRepository {
   async findById(id: string): Promise<ProfileRow | null> {
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, name, email, phone, role, staff_note, created_at")
+      .select("*")
       .eq("id", id)
       .single();
 
@@ -28,7 +28,7 @@ export class SupabaseUserRepository implements IUserRepository {
   async findCustomers(): Promise<ProfileRow[]> {
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, name, email, phone, staff_note, created_at")
+      .select("*")
       .eq("role", "customer")
       .order("created_at", { ascending: false });
 
@@ -39,7 +39,7 @@ export class SupabaseUserRepository implements IUserRepository {
   async findByPhone(phone: string): Promise<ProfileRow | null> {
     const { data, error } = await supabaseAdmin
       .from("profiles")
-      .select("id, name, email, phone, role, staff_note, created_at")
+      .select("*")
       .eq("phone", phone)
       .eq("role", "customer")
       .single();
@@ -65,7 +65,7 @@ export class SupabaseUserRepository implements IUserRepository {
       .from("profiles")
       .update({ staff_note: note })
       .eq("id", id)
-      .select("id, name, email, phone, role, staff_note, created_at")
+      .select("*")
       .single();
 
     if (error) throw error;

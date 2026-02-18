@@ -15,28 +15,17 @@ export default function AuthCallback() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const handleCallback = async () => {
+    const supabase = getSupabase();
+
+    const processSession = async (accessToken: string) => {
       try {
-        const supabase = getSupabase();
-
-        // SupabaseがURLハッシュフラグメントから自動的にセッションを取得
-        const { data, error: sessionError } = await supabase.auth.getSession();
-
-        if (sessionError || !data.session) {
-          setError("認証に失敗しました");
-          return;
-        }
-
-        // バックエンドでプロフィール確認
         const result = await api<OAuthResponse>("/auth/customer/oauth", {
           method: "POST",
-          body: { access_token: data.session.access_token },
+          body: { access_token: accessToken },
         });
 
-        // ローカルストレージに保存
         customerAuth.login(result.token, result.user);
 
-        // 電話番号未登録なら入力ページへ
         if (result.needsPhone) {
           router.push("/reserve/complete-profile");
         } else {
@@ -48,7 +37,25 @@ export default function AuthCallback() {
       }
     };
 
-    handleCallback();
+    // PKCE flow: URLに?code=がある場合、onAuthStateChangeでセッション確立を待つ
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          await processSession(session.access_token);
+        }
+      }
+    );
+
+    // Hash fragment flow (fallback): 既にセッションがある場合
+    const checkExistingSession = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        await processSession(data.session.access_token);
+      }
+    };
+    checkExistingSession();
+
+    return () => subscription.unsubscribe();
   }, [router]);
 
   if (error) {
