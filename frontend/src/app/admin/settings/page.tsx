@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, staffAuth as auth } from "@/lib/api";
 import { User } from "@/lib/types";
+import CustomerDetailModal from "../components/CustomerDetailModal";
 
 type Customer = {
   id: string;
@@ -27,6 +28,7 @@ export default function AdminSettings() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [loginLoading, setLoginLoading] = useState(false);
+  const [modalCustomerId, setModalCustomerId] = useState<string | null>(null);
 
   useEffect(() => {
     const u = auth.getUser();
@@ -234,7 +236,14 @@ export default function AdminSettings() {
                 <tbody>
                   {customers.map((c) => (
                     <tr key={c.id} className="border-t text-sm">
-                      <td className="px-3 py-2 font-medium">{c.name}</td>
+                      <td className="px-3 py-2 font-medium">
+                        <button
+                          onClick={() => setModalCustomerId(c.id)}
+                          className="hover:underline text-left"
+                        >
+                          {c.name}
+                        </button>
+                      </td>
                       <td className="px-3 py-2">{c.phone}</td>
                       <td className="px-3 py-2 text-gray-500">{c.email || "-"}</td>
                       <td className="px-3 py-2 text-gray-500">
@@ -248,6 +257,14 @@ export default function AdminSettings() {
           )}
         </div>
       </main>
+
+      {modalCustomerId && (
+        <CustomerDetailModal
+          customerId={modalCustomerId}
+          customerPhone={null}
+          onClose={() => setModalCustomerId(null)}
+        />
+      )}
     </div>
   );
 }
