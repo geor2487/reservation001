@@ -5,6 +5,8 @@ import Link from "next/link";
 import { api, staffAuth as auth } from "@/lib/api";
 import { User } from "@/lib/types";
 import CustomerDetailModal from "../components/CustomerDetailModal";
+import { AdminHeader } from "@/components/AdminHeader";
+import { AlertMessage } from "@/components/AlertMessage";
 
 type Customer = {
   id: string;
@@ -118,27 +120,12 @@ export default function AdminSettings() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-gray-800 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Link href="/admin" className="text-lg font-bold">管理画面</Link>
-            <nav className="flex gap-3 text-sm">
-              <Link href="/admin" className="text-gray-300 hover:text-white">予約一覧</Link>
-              <Link href="/admin/reservations/new" className="text-gray-300 hover:text-white">予約登録</Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <AdminHeader />
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <h1 className="text-xl font-bold mb-6">設定</h1>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
-        {success && (
-          <div className="bg-green-50 text-green-600 p-3 rounded-lg mb-4 text-sm">{success}</div>
-        )}
+        <AlertMessage error={error} success={success} />
 
         {/* ユーザー名変更 */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">

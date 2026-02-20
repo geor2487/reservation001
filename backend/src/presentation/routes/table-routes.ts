@@ -1,7 +1,7 @@
-import { Router, Request, Response } from "express";
+import { Router } from "express";
 import { authenticateStaff, AuthRequest } from "../middleware/auth";
 import { container } from "../../infrastructure/container";
-import { DomainError } from "../../shared/errors";
+import { handleRoute } from "./handle-route";
 import { ListTablesUseCase } from "../../application/usecases/tables/list-tables";
 import { CreateTableUseCase } from "../../application/usecases/tables/create-table";
 import { UpdateTableUseCase } from "../../application/usecases/tables/update-table";
@@ -14,60 +14,24 @@ const createTable = new CreateTableUseCase(container.tableRepo);
 const updateTable = new UpdateTableUseCase(container.tableRepo);
 const deleteTable = new DeleteTableUseCase(container.tableRepo);
 
-router.get("/", async (_req: Request, res: Response): Promise<void> => {
-  try {
-    const data = await listTables.execute();
-    res.json(data);
-  } catch (error) {
-    if (error instanceof DomainError) {
-      res.status(error.statusCode).json({ error: error.message });
-      return;
-    }
-    console.error("テーブル一覧取得エラー:", error);
-    res.status(500).json({ error: "サーバーエラーが発生しました" });
-  }
-});
+router.get("/", handleRoute("テーブル一覧取得エラー", async (_req, res) => {
+  const data = await listTables.execute();
+  res.json(data);
+}));
 
-router.post("/", authenticateStaff, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const data = await createTable.execute(req.body);
-    res.status(201).json(data);
-  } catch (error) {
-    if (error instanceof DomainError) {
-      res.status(error.statusCode).json({ error: error.message });
-      return;
-    }
-    console.error("テーブル追加エラー:", error);
-    res.status(500).json({ error: "サーバーエラーが発生しました" });
-  }
-});
+router.post("/", authenticateStaff, handleRoute("テーブル追加エラー", async (req, res) => {
+  const data = await createTable.execute(req.body);
+  res.status(201).json(data);
+}));
 
-router.put("/:id", authenticateStaff, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const data = await updateTable.execute(parseInt(req.params.id), req.body);
-    res.json(data);
-  } catch (error) {
-    if (error instanceof DomainError) {
-      res.status(error.statusCode).json({ error: error.message });
-      return;
-    }
-    console.error("テーブル更新エラー:", error);
-    res.status(500).json({ error: "サーバーエラーが発生しました" });
-  }
-});
+router.put("/:id", authenticateStaff, handleRoute("テーブル更新エラー", async (req, res) => {
+  const data = await updateTable.execute(parseInt(req.params.id), req.body);
+  res.json(data);
+}));
 
-router.delete("/:id", authenticateStaff, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const data = await deleteTable.execute(parseInt(req.params.id));
-    res.json(data);
-  } catch (error) {
-    if (error instanceof DomainError) {
-      res.status(error.statusCode).json({ error: error.message });
-      return;
-    }
-    console.error("テーブル削除エラー:", error);
-    res.status(500).json({ error: "サーバーエラーが発生しました" });
-  }
-});
+router.delete("/:id", authenticateStaff, handleRoute("テーブル削除エラー", async (req, res) => {
+  const data = await deleteTable.execute(parseInt(req.params.id));
+  res.json(data);
+}));
 
 export default router;

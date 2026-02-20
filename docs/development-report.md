@@ -360,15 +360,15 @@ docker compose up -d
 
 # 2. バックエンドの準備
 cd backend
-npm install
-npm run db:migrate   # テーブル作成
-npm run db:seed      # テストデータ投入
-npm run dev          # http://localhost:3001 で起動
+pnpm install
+pnpm db:migrate      # テーブル作成
+pnpm db:seed         # テストデータ投入
+pnpm dev             # http://localhost:3001 で起動
 
 # 3. フロントエンドの準備
 cd frontend
-npm install
-npm run dev          # http://localhost:3000 で起動
+pnpm install
+pnpm dev             # http://localhost:3000 で起動
 ```
 
 ### テストアカウント

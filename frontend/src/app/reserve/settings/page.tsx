@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, customerAuth as auth } from "@/lib/api";
 import { User } from "@/lib/types";
+import { AlertMessage } from "@/components/AlertMessage";
+import { validatePhone } from "@/lib/utils";
 
 export default function CustomerSettings() {
   const router = useRouter();
@@ -40,7 +42,7 @@ export default function CustomerSettings() {
       setError("名前、メールアドレス、電話番号は必須です");
       return;
     }
-    if (!/^0\d{9,10}$/.test(form.phone)) {
+    if (!validatePhone(form.phone)) {
       setError("電話番号は0始まりの10〜11桁の数字で入力してください");
       return;
     }
@@ -111,12 +113,7 @@ export default function CustomerSettings() {
       <main className="max-w-lg mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">設定</h1>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
-        {success && (
-          <div className="bg-green-50 text-green-600 p-3 rounded-lg mb-4 text-sm">{success}</div>
-        )}
+        <AlertMessage error={error} success={success} />
 
         {/* 登録情報 */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">

@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { api, staffAuth as auth } from "@/lib/api";
 import { Table } from "@/lib/types";
+import { AdminHeader } from "@/components/AdminHeader";
+import { AlertMessage } from "@/components/AlertMessage";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 export default function AdminTables() {
-  const router = useRouter();
   const [tables, setTables] = useState<Table[]>([]);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -14,13 +14,7 @@ export default function AdminTables() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const u = auth.getUser();
-    if (!u || u.role !== "staff") {
-      router.push("/admin/login");
-      return;
-    }
-  }, [router]);
+  useRequireAuth(auth, "staff", "/admin/login");
 
   const fetchTables = useCallback(async () => {
     try {
@@ -93,15 +87,7 @@ export default function AdminTables() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-gray-800 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center gap-4">
-          <Link href="/admin" className="text-lg font-bold">管理画面</Link>
-          <nav className="flex gap-3 text-sm">
-            <Link href="/admin" className="text-gray-300 hover:text-white">予約一覧</Link>
-            <Link href="/admin/reservations/new" className="text-gray-300 hover:text-white">予約登録</Link>
-          </nav>
-        </div>
-      </header>
+      <AdminHeader />
 
       <main className="max-w-3xl mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-6">
@@ -123,9 +109,7 @@ export default function AdminTables() {
           </button>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
+        <AlertMessage error={error} />
 
         {/* 追加/編集フォーム */}
         {(showForm || editingId) && (

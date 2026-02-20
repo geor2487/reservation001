@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, staffAuth as auth } from "@/lib/api";
 import { AuthResponse } from "@/lib/types";
+import { AlertMessage } from "@/components/AlertMessage";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -37,9 +38,7 @@ export default function AdminLogin() {
         <h1 className="text-2xl font-bold text-center mb-2">管理画面</h1>
         <p className="text-center text-gray-900 text-sm mb-6">店員ログイン</p>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
+        <AlertMessage error={error} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

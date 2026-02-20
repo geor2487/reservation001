@@ -1,24 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
 import { api, staffAuth as auth } from "@/lib/api";
 import { Table, Reservation, AvailabilityResponse } from "@/lib/types";
+import { AdminHeader } from "@/components/AdminHeader";
+import { AlertMessage } from "@/components/AlertMessage";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
+import { generateTimeOptions } from "@/lib/utils";
 
-// 17:30〜24:00まで15分間隔の時間選択肢を生成
-const generateTimeOptions = (): string[] => {
-  const options: string[] = [];
-  for (let h = 17; h <= 24; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      if (h === 17 && m < 30) continue;
-      if (h === 24 && m > 0) break;
-      options.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-    }
-  }
-  return options;
-};
-
-const timeOptions = generateTimeOptions();
+const timeOptions = generateTimeOptions(24);
 
 export default function AdminNewReservation() {
   const router = useRouter();
@@ -36,14 +26,11 @@ export default function AdminNewReservation() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const user = useRequireAuth(auth, "staff", "/admin/login");
+
   useEffect(() => {
-    const u = auth.getUser();
-    if (!u || u.role !== "staff") {
-      router.push("/admin/login");
-      return;
-    }
-    fetchTables();
-  }, [router]);
+    if (user) fetchTables();
+  }, [user]);
 
   // 日付変更時にその日の予約を取得
   useEffect(() => {
@@ -107,24 +94,12 @@ export default function AdminNewReservation() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <header className="bg-gray-800 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Link href="/admin" className="text-lg font-bold">管理画面</Link>
-            <nav className="flex gap-3 text-sm">
-              <Link href="/admin" className="text-gray-300 hover:text-white">予約一覧</Link>
-              <Link href="/admin/reservations/new" className="text-orange-300 hover:text-orange-200">予約登録</Link>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <AdminHeader currentPage="new-reservation" />
 
       <main className="max-w-2xl mx-auto px-4 py-6">
         <h1 className="text-xl font-bold mb-6">予約を登録</h1>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
+        <AlertMessage error={error} />
 
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">

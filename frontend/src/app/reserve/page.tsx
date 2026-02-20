@@ -3,19 +3,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api, customerAuth as auth } from "@/lib/api";
 import { AvailabilityResponse, Table, Reservation, User } from "@/lib/types";
-
-// 17:30〜22:00まで15分間隔の時間選択肢を生成
-const generateTimeOptions = (): string[] => {
-  const options: string[] = [];
-  for (let h = 17; h <= 22; h++) {
-    for (let m = 0; m < 60; m += 15) {
-      if (h === 17 && m < 30) continue;
-      if (h === 22 && m > 0) break;
-      options.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`);
-    }
-  }
-  return options;
-};
+import { AlertMessage } from "@/components/AlertMessage";
+import { validatePhone, generateTimeOptions } from "@/lib/utils";
 
 const timeOptions = generateTimeOptions();
 
@@ -103,7 +92,7 @@ export default function ReservePage() {
       return;
     }
 
-    if (!user && !/^0\d{9,10}$/.test(guestPhone)) {
+    if (!user && !validatePhone(guestPhone)) {
       setError("電話番号は0始まりの10〜11桁の数字で入力してください");
       return;
     }
@@ -247,9 +236,7 @@ export default function ReservePage() {
           </p>
         )}
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
+        <AlertMessage error={error} />
 
         {/* Step 1: 人数選択 */}
         <div className="bg-white rounded-xl shadow-sm p-6 mb-6">

@@ -21,18 +21,18 @@ docker compose up -d
 
 ```bash
 cd backend
-npm install
-npm run db:migrate   # テーブル作成
-npm run db:seed      # テストデータ投入
-npm run dev          # サーバー起動（http://localhost:3001）
+pnpm install
+pnpm db:migrate      # テーブル作成
+pnpm db:seed         # テストデータ投入
+pnpm dev             # サーバー起動（http://localhost:3001）
 ```
 
 ### 3. フロントエンドのセットアップ
 
 ```bash
 cd frontend
-npm install
-npm run dev          # 開発サーバー起動（http://localhost:3000）
+pnpm install
+pnpm dev             # 開発サーバー起動（http://localhost:3000）
 ```
 
 ## テストアカウント

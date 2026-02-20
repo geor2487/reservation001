@@ -3,8 +3,11 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, staffAuth as auth } from "@/lib/api";
-import { Reservation, User, Table } from "@/lib/types";
+import { Reservation, Table } from "@/lib/types";
 import CustomerDetailModal from "./components/CustomerDetailModal";
+import { AdminHeader, AdminUserMenu } from "@/components/AdminHeader";
+import { AlertMessage } from "@/components/AlertMessage";
+import { useRequireAuth } from "@/hooks/useRequireAuth";
 
 // タイムライン用定数
 const START_HOUR = 17;
@@ -26,23 +29,13 @@ const getWidthPercent = (startTime: string, endTime: string): number => {
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const user = useRequireAuth(auth, "staff", "/admin/login");
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [tables, setTables] = useState<Table[]>([]);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [showMenu, setShowMenu] = useState(false);
   const [modalTarget, setModalTarget] = useState<{ customerId: string | null; customerPhone: string | null } | null>(null);
-
-  useEffect(() => {
-    const u = auth.getUser();
-    if (!u || u.role !== "staff") {
-      router.push("/admin/login");
-      return;
-    }
-    setUser(u);
-  }, [router]);
 
   const fetchReservations = useCallback(async () => {
     const token = auth.getToken();
@@ -121,43 +114,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* ヘッダー */}
-      <header className="bg-gray-800 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <Link href="/admin" className="text-lg font-bold">管理画面</Link>
-            <nav className="flex gap-3 text-sm">
-              <Link href="/admin" className="text-orange-300 hover:text-orange-200">予約一覧</Link>
-              <Link href="/admin/reservations/new" className="text-gray-300 hover:text-white">予約登録</Link>
-            </nav>
-          </div>
-          <div className="relative">
-            <button
-              onClick={() => setShowMenu(!showMenu)}
-              className="text-sm text-gray-300 hover:text-white"
-            >
-              {user.name}
-            </button>
-            {showMenu && (
-              <div className="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg py-1 z-50">
-                <Link
-                  href="/admin/settings"
-                  className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  onClick={() => setShowMenu(false)}
-                >
-                  設定
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                >
-                  ログアウト
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </header>
+      <AdminHeader
+        currentPage="reservations"
+        rightContent={user ? <AdminUserMenu user={user} onLogout={handleLogout} /> : undefined}
+      />
 
       <main className="max-w-6xl mx-auto px-4 py-6">
         {/* 日付選択 & サマリー */}
@@ -192,9 +152,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
+        <AlertMessage error={error} />
 
         {/* タイムライン */}
         {loading ? (

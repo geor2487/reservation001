@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api, customerAuth as auth } from "@/lib/api";
 import { Reservation } from "@/lib/types";
+import { AlertMessage } from "@/components/AlertMessage";
 
 export default function MyReservations() {
   const router = useRouter();
@@ -71,9 +72,7 @@ export default function MyReservations() {
       <main className="max-w-4xl mx-auto px-4 py-8">
         <h1 className="text-2xl font-bold mb-6">マイ予約</h1>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
+        <AlertMessage error={error} />
 
         {reservations.length === 0 ? (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center text-gray-900">

@@ -20,7 +20,7 @@ export type Reservation = {
   start_time: string;
   end_time: string;
   party_size: number;
-  status: "pending" | "confirmed" | "cancelled";
+  status: "confirmed" | "cancelled";
   note: string | null;
   created_by: "customer" | "staff";
   created_at: string;

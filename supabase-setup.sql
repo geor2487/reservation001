@@ -10,7 +10,6 @@ CREATE TABLE profiles (
   name VARCHAR(100) NOT NULL,
   email VARCHAR(255),
   phone VARCHAR(20),
-  staff_note TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

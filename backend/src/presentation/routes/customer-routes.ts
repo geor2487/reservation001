@@ -1,7 +1,7 @@
-import { Router, Response } from "express";
+import { Router } from "express";
 import { authenticateStaff, AuthRequest } from "../middleware/auth";
 import { container } from "../../infrastructure/container";
-import { DomainError } from "../../shared/errors";
+import { handleRoute } from "./handle-route";
 import { flattenReservation } from "../dto/reservation-dto";
 import { ReservationRow } from "../../domain/repositories/reservation-repository";
 import { GetCustomerDetailUseCase } from "../../application/usecases/customers/get-customer-detail";
@@ -15,61 +15,34 @@ const getCustomerByPhone = new GetCustomerByPhoneUseCase(container.userRepo, con
 const updateStaffNote = new UpdateStaffNoteUseCase(container.userRepo);
 
 // 登録顧客の詳細+予約履歴
-router.get("/:id/detail", authenticateStaff, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const result = await getCustomerDetail.execute(req.params.id);
-    res.json({
-      profile: result.profile,
-      visitCount: result.visitCount,
-      reservations: (result.reservations as ReservationRow[]).map(flattenReservation),
-    });
-  } catch (error) {
-    if (error instanceof DomainError) {
-      res.status(error.statusCode).json({ error: error.message });
-      return;
-    }
-    console.error("顧客詳細取得エラー:", error);
-    res.status(500).json({ error: "サーバーエラーが発生しました" });
-  }
-});
+router.get("/:id/detail", authenticateStaff, handleRoute("顧客詳細取得エラー", async (req, res) => {
+  const result = await getCustomerDetail.execute(req.params.id);
+  res.json({
+    profile: result.profile,
+    visitCount: result.visitCount,
+    reservations: (result.reservations as ReservationRow[]).map(flattenReservation),
+  });
+}));
 
 // 電話番号で予約履歴検索（ゲスト対応）
-router.get("/by-phone/:phone", authenticateStaff, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const result = await getCustomerByPhone.execute(req.params.phone);
-    res.json({
-      profile: result.profile,
-      visitCount: result.visitCount,
-      reservations: (result.reservations as ReservationRow[]).map(flattenReservation),
-    });
-  } catch (error) {
-    if (error instanceof DomainError) {
-      res.status(error.statusCode).json({ error: error.message });
-      return;
-    }
-    console.error("電話番号検索エラー:", error);
-    res.status(500).json({ error: "サーバーエラーが発生しました" });
-  }
-});
+router.get("/by-phone/:phone", authenticateStaff, handleRoute("電話番号検索エラー", async (req, res) => {
+  const result = await getCustomerByPhone.execute(req.params.phone);
+  res.json({
+    profile: result.profile,
+    visitCount: result.visitCount,
+    reservations: (result.reservations as ReservationRow[]).map(flattenReservation),
+  });
+}));
 
 // スタッフメモ更新
-router.put("/:id/staff-note", authenticateStaff, async (req: AuthRequest, res: Response): Promise<void> => {
-  try {
-    const { note } = req.body;
-    if (note === undefined) {
-      res.status(400).json({ error: "noteフィールドが必要です" });
-      return;
-    }
-    const result = await updateStaffNote.execute(req.params.id, note);
-    res.json(result);
-  } catch (error) {
-    if (error instanceof DomainError) {
-      res.status(error.statusCode).json({ error: error.message });
-      return;
-    }
-    console.error("スタッフメモ更新エラー:", error);
-    res.status(500).json({ error: "サーバーエラーが発生しました" });
+router.put("/:id/staff-note", authenticateStaff, handleRoute("スタッフメモ更新エラー", async (req, res) => {
+  const { note } = req.body;
+  if (note === undefined) {
+    res.status(400).json({ error: "noteフィールドが必要です" });
+    return;
   }
-});
+  const result = await updateStaffNote.execute(req.params.id, note);
+  res.json(result);
+}));
 
 export default router;

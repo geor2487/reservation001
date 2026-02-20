@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { api, customerAuth } from "@/lib/api";
 import { User } from "@/lib/types";
+import { AlertMessage } from "@/components/AlertMessage";
+import { validatePhone } from "@/lib/utils";
 
 export default function CompleteProfile() {
   const router = useRouter();
@@ -24,7 +26,7 @@ export default function CompleteProfile() {
     e.preventDefault();
     setError("");
 
-    if (!/^0\d{9,10}$/.test(phone)) {
+    if (!validatePhone(phone)) {
       setError("電話番号は0始まりの10〜11桁の数字で入力してください");
       return;
     }
@@ -61,9 +63,7 @@ export default function CompleteProfile() {
           予約に必要な情報を入力してください
         </p>
 
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4 text-sm">{error}</div>
-        )}
+        <AlertMessage error={error} />
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
